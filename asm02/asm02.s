@@ -13,9 +13,15 @@ _start:
     mov rax, 0
     mov rdi, 0
     mov rsi, buffer
-    mov rdx, 4
+    mov rdx, 5
     syscall
 
+    cmp rax, 3
+    je .check
+    cmp rax, 4
+    jne exit_failure
+
+.check:
     mov rsi, buffer
     mov rdi, input
     mov rcx, 2
