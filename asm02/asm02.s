@@ -1,10 +1,11 @@
 section .data
-    input db "42"
-    msg db "1337", 10
-    msg_len equ $ - msg
+    expected db "42", 0x0A
+    expected_len equ $ - expected
+    output db "1337", 0x0A
+    output_len equ $ - output
 
 section .bss
-    buffer resb 4
+    buffer resb 8
 
 section .text
     global _start
@@ -13,25 +14,22 @@ _start:
     mov rax, 0
     mov rdi, 0
     mov rsi, buffer
-    mov rdx, 5
+    mov rdx, 8
     syscall
 
-    cmp rax, 3
-    je .check
-    cmp rax, 4
+    cmp rax, expected_len
     jne exit_failure
 
-.check:
     mov rsi, buffer
-    mov rdi, input
-    mov rcx, 2
+    mov rdi, expected
+    mov rcx, expected_len
     repe cmpsb
     jne exit_failure
 
     mov rax, 1
     mov rdi, 1
-    mov rsi, msg
-    mov rdx, msg_len
+    mov rsi, output
+    mov rdx, output_len
     syscall
 
 exit_success:
