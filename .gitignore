@@ -3,3 +3,4 @@ docker-compose.yml
 
 *.o
 asm00/asm00
+asm01/asm01
