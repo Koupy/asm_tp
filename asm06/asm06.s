@@ -50,6 +50,13 @@ exit_failure:
 ascii_to_int:
     xor rax, rax
     xor rbx, rbx
+    mov r10, 1
+
+    cmp byte [rsi], '-'
+    jne .loop
+    mov r10, -1
+    inc rsi
+
 .loop:
     mov bl, [rsi]
     cmp bl, 0
@@ -60,11 +67,20 @@ ascii_to_int:
     inc rsi
     jmp .loop
 .done:
+    imul rax, r10
     ret
 
 int_to_ascii:
     mov r8, rdi
     mov r9, 10
+    mov r11, 0
+
+    test rax, rax
+    jns .convert
+    neg rax
+    mov r11, 1
+
+.convert:
     add rdi, 19
     mov byte [rdi], 0
     dec rdi
@@ -77,6 +93,12 @@ int_to_ascii:
     test rax, rax
     jnz .loop
 
+    cmp r11, 1
+    jne .copy
+    mov byte [rdi], '-'
+    dec rdi
+
+.copy:
     inc rdi
     mov rdx, r8
     add rdx, 20
