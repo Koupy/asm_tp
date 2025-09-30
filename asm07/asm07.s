@@ -35,6 +35,10 @@ ascii_to_int:
     mov bl, [rsi]
     cmp bl, 10
     je .done
+    cmp bl, '0'
+    jb .invalid
+    cmp bl, '9'
+    ja .invalid
     sub bl, '0'
     imul rax, 10
     add rax, rbx
@@ -42,6 +46,10 @@ ascii_to_int:
     jmp .loop
 .done:
     ret
+.invalid:
+    mov rax, 60
+    mov rdi, 2
+    syscall
 
 is_prime:
     cmp rax, 2
