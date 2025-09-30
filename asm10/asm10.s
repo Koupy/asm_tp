@@ -9,27 +9,30 @@ section .text
     global _start
 
 _start:
-    cmp qword [rsp], 2
-    jne fail_exit
+    cmp qword [rsp], 4
+    jne exit_failure
 
     mov rsi, [rsp+16]
-    call str_to_int
-    mov r15, rax
+    call ascii_to_int
+    mov r12, rax
 
-    mov r14, 2
+    mov rsi, [rsp+24]
+    call ascii_to_int
+    cmp r12, rax
+    jge .skip1
+    mov r12, rax
+.skip1:
 
-.loop_numbers:
-    cmp r14, r15
-    jg exit_success
+    mov rsi, [rsp+32]
+    call ascii_to_int
+    cmp r12, rax
+    jge .skip2
+    mov r12, rax
+.skip2:
 
-    mov rax, r14
-    call is_prime
-    test rax, rax
-    jz .next_number
-
-    mov rax, r14
+    mov rax, r12
     mov rdi, buffer
-    call int_to_str
+    call int_to_ascii
 
     mov rdx, rax
     mov rax, 1
@@ -43,65 +46,52 @@ _start:
     mov rdx, 1
     syscall
 
-.next_number:
-    inc r14
-    jmp .loop_numbers
-
 exit_success:
     mov rax, 60
     xor rdi, rdi
     syscall
 
-fail_exit:
+exit_failure:
     mov rax, 60
     mov rdi, 1
     syscall
 
-str_to_int:
+ascii_to_int:
     xor rax, rax
-.next_char:
-    movzx rdx, byte [rsi]
-    cmp dl, 0
-    je .done
-    sub dl, '0'
-    imul rax, rax, 10
-    add rax, rdx
+    xor rbx, rbx
+    xor r10, r10
+    
+    cmp byte [rsi], '-'
+    jne .loop
+    mov r10, 1
     inc rsi
-    jmp .next_char
+    
+.loop:
+    mov bl, [rsi]
+    cmp bl, 0
+    je .done
+    sub bl, '0'
+    imul rax, 10
+    add rax, rbx
+    inc rsi
+    jmp .loop
 .done:
+    test r10, r10
+    jz .positive
+    neg rax
+.positive:
     ret
 
-is_prime:
-    cmp rax, 2
-    jb .not_prime
-    cmp rax, 2
-    je .prime
-    
-    mov rbx, rax
-    mov rcx, 2
-    
-.check_loop:
-    mov rax, rbx
-    xor rdx, rdx
-    div rcx
-    test rdx, rdx
-    jz .not_prime
-    
-    inc rcx
-    mov rax, rcx
-    imul rax, rax
-    cmp rax, rbx
-    jbe .check_loop
-    
-.prime:
-    mov rax, 1
-    ret
-.not_prime:
-    xor rax, rax
-    ret
-
-int_to_str:
+int_to_ascii:
     mov r8, rdi
+    mov r11, 0
+    
+    test rax, rax
+    jns .convert
+    neg rax
+    mov r11, 1
+    
+.convert:
     add rdi, 31
     mov byte [rdi], 0
     dec rdi
@@ -113,11 +103,21 @@ int_to_str:
     dec rdi
     test rax, rax
     jnz .loop
+
+    cmp r11, 1
+    jne .copy
+    mov byte [rdi], '-'
+    dec rdi
+
+.copy:
     inc rdi
+    mov rdx, r8
+    add rdx, 32
+    sub rdx, rdi
+    mov rax, rdx
+
+    mov rcx, rax
     mov rsi, rdi
     mov rdi, r8
-    mov rcx, 32
     rep movsb
-    mov rax, rsi
-    sub rax, r8
     ret
