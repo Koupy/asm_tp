@@ -3,7 +3,7 @@ section .bss
     result resb 32
 
 section .data
-    vowels db "aeiouAEIOU"
+    vowels db "aeiouyAEIOUY"
     nl db 10
     ten dq 10
 
@@ -28,7 +28,7 @@ _start:
 
     mov r15, 0
 .vowel_loop:
-    cmp r15, 10
+    cmp r15, 12
     je .next_char
     mov bl, [vowels+r15]
     cmp r14b, bl
