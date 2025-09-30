@@ -10,13 +10,10 @@ section .text
     global _start
 
 _start:
-    mov rax, 0
-    mov rdi, 0
-    mov rsi, input
-    mov rdx, 32
-    syscall
+    cmp qword [rsp], 2
+    jne fail_exit
 
-    mov rsi, input
+    mov rsi, [rsp+16]
     call str_to_int
     mov rbx, rax
 
@@ -42,6 +39,11 @@ _start:
 
     mov rax, 60
     xor rdi, rdi
+    syscall
+
+fail_exit:
+    mov rax, 60
+    mov rdi, 1
     syscall
 
 str_to_int:
