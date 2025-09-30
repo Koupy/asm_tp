@@ -45,36 +45,27 @@ ascii_to_int:
 
 is_prime:
     cmp rax, 2
-    jl .not_prime
-    cmp rax, 2
-    je .prime
-    cmp rax, 3
-    je .prime
+    jb .not_prime
     
-    test rax, 1
-    jz .not_prime
+    mov rbx, rax
+    mov rcx, 2
     
-    mov r12, rax
-    mov r13, 3
-    
-.test_loop:
-    mov rax, r12
-    shr rax, 1
-    cmp r13, rax
-    jg .prime
-    
-    mov rax, r12
+.check_loop:
+    mov rax, rbx
     xor rdx, rdx
-    div r13
+    div rcx
     cmp rdx, 0
     je .not_prime
     
-    add r13, 2
-    jmp .test_loop
-
+    inc rcx
+    mov rax, rcx
+    imul rax, rax
+    cmp rax, rbx
+    jbe .check_loop
+    
 .prime:
-    mov rax, 1
+    xor rax, rax
     ret
 .not_prime:
-    xor rax, rax
+    mov rax, 1
     ret
