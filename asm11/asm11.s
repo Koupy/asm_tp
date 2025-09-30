@@ -1,7 +1,9 @@
 section .bss
-    buffer resb 32
+    input resb 1024
+    result resb 32
 
 section .data
+    vowels db "aeiouAEIOU"
     nl db 10
     ten dq 10
 
@@ -9,21 +11,47 @@ section .text
     global _start
 
 _start:
-    cmp qword [rsp], 2
-    jne fail_exit
+    mov rax, 0
+    mov rdi, 0
+    mov rsi, input
+    mov rdx, 1024
+    syscall
 
-    mov rsi, [rsp+16]
-    call str_to_int
+    mov r12, 0
+    mov r13, input
+.char_loop:
+    mov r14b, [r13]
+    cmp r14b, 10
+    je .end_count
+    cmp r14b, 0
+    je .end_count
 
-    call factorial
+    mov r15, 0
+.vowel_loop:
+    cmp r15, 10
+    je .next_char
+    mov bl, [vowels+r15]
+    cmp r14b, bl
+    je .found_vowel
+    inc r15
+    jmp .vowel_loop
 
-    mov rdi, buffer
+.found_vowel:
+    inc r12
+
+.next_char:
+    inc r13
+    jmp .char_loop
+
+.end_count:
+    mov rax, r12
+    mov rdi, result
     call int_to_str
 
     mov rdx, rax
     mov rax, 1
     mov rdi, 1
-    mov rsi, buffer
+    mov rsi, result
     syscall
 
     mov rax, 1
@@ -35,48 +63,6 @@ _start:
     mov rax, 60
     xor rdi, rdi
     syscall
-
-fail_exit:
-    mov rax, 60
-    mov rdi, 1
-    syscall
-
-str_to_int:
-    xor rax, rax
-.next_char:
-    movzx rdx, byte [rsi]
-    cmp dl, 0
-    je .done
-    sub dl, '0'
-    imul rax, rax, 10
-    add rax, rdx
-    inc rsi
-    jmp .next_char
-.done:
-    ret
-
-factorial:
-    cmp rax, 0
-    je .zero
-    cmp rax, 1
-    je .one
-    
-    mov rbx, rax
-    mov rcx, 1
-    
-.loop:
-    imul rcx, rbx
-    dec rbx
-    cmp rbx, 1
-    jg .loop
-    
-    mov rax, rcx
-    ret
-    
-.zero:
-.one:
-    mov rax, 1
-    ret
 
 int_to_str:
     mov r8, rdi
