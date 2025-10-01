@@ -18,7 +18,7 @@ _start:
     dec r12
 .remove_newlines:
     cmp r12, 0
-    jl not_palindrome
+    jl palindrome
     mov al, [buffer+r12]
     cmp al, 10
     je .dec_and_continue
