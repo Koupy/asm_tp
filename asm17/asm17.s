@@ -23,26 +23,37 @@ _start:
     mov r13, rax
 
     mov r14, buffer
-    mov r15, buffer
-    add r15, r13
+    lea r15, [buffer + r13]
 .cipher_loop:
     cmp r14, r15
     jge .endcipher
 
-    mov r15b, [r14]
+    movzx rax, byte [r14]
 
-    cmp r15b, 'a'
+    cmp al, 'a'
+    jl .check_upper
+    cmp al, 'z'
+    jg .check_upper
+
+    add al, r12b
+    cmp al, 'z'
+    jle .char
+    sub al, 26
+    jmp .char
+
+.check_upper:
+    cmp al, 'A'
     jl .nextchar
-    cmp r15b, 'z'
+    cmp al, 'Z'
     jg .nextchar
 
-    add r15b, r12b
-    cmp r15b, 'z'
+    add al, r12b
+    cmp al, 'Z'
     jle .char
-    sub r15b, 26
+    sub al, 26
 
 .char:
-    mov [r14], r15b
+    mov [r14], al
 
 .nextchar:
     inc r14
