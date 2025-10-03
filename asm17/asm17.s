@@ -14,6 +14,16 @@ _start:
     mov rsi, [rsp+16]
     call ascii_to_int
     mov r12, rax
+    
+    mov rax, r12
+    mov rbx, 26
+    cqo
+    idiv rbx
+    mov r12, rdx
+    test r12, r12
+    jns .positive_shift
+    add r12, 26
+.positive_shift:
 
     mov rax, 0
     mov rdi, 0
@@ -79,6 +89,13 @@ exit_failure:
 ascii_to_int:
     xor rax, rax
     xor rbx, rbx
+    xor rdx, rdx
+    
+    cmp byte [rsi], '-'
+    jne .loop
+    mov rdx, 1
+    inc rsi
+    
 .loop:
     mov bl, [rsi]
     cmp bl, 0
@@ -89,6 +106,8 @@ ascii_to_int:
     inc rsi
     jmp .loop
 .done:
-    ret
-
+    test rdx, rdx
+    jz .positive
+    neg rax
+.positive:
     ret

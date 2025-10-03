@@ -19,10 +19,15 @@ _start:
     mov rsi, bin_flag
     call string_compare
     cmp rax, 0
-    jne .check_arg_count
+    jne .invalid_flag
 
     mov r12, 2
     mov r13, [rsp+24]
+    jmp .check_arg_count
+
+.invalid_flag:
+    cmp qword [rsp], 3
+    je exit_failure
 
 .check_arg_count:
     cmp qword [rsp], 2
@@ -30,6 +35,11 @@ _start:
 
     mov rsi, r13
     call ascii_to_int
+    cmp rcx, 1
+    je exit_failure
+    
+    test rax, rax
+    js exit_failure
 
     mov rdi, result_buffer
     mov rsi, r12
@@ -84,15 +94,25 @@ string_compare:
 ascii_to_int:
     xor rax, rax
     xor rbx, rbx
+    xor rcx, rcx
 .loop:
     mov bl, [rsi]
     cmp bl, 0
     je .done
+    
+    cmp bl, '0'
+    jl .error
+    cmp bl, '9'
+    jg .error
+    
     sub bl, '0'
     imul rax, 10
     add rax, rbx
     inc rsi
     jmp .loop
+.error:
+    mov rcx, 1
+    ret
 .done:
     ret
 

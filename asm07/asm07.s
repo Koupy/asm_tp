@@ -13,9 +13,12 @@ _start:
 
     mov rsi, buffer
     call ascii_to_int
+    
+    test rax, rax
+    js exit_not_prime
 
     call is_prime
-    cmp rax, 0
+    cmp rax, 1
     je exit_prime
 
 exit_not_prime:
@@ -31,9 +34,18 @@ exit_prime:
 ascii_to_int:
     xor rax, rax
     xor rbx, rbx
+    xor rdx, rdx
+    
+    cmp byte [rsi], '-'
+    jne .loop
+    mov rdx, 1
+    inc rsi
+    
 .loop:
     mov bl, [rsi]
     cmp bl, 10
+    je .done
+    cmp bl, 0
     je .done
     cmp bl, '0'
     jb .invalid
@@ -45,6 +57,10 @@ ascii_to_int:
     inc rsi
     jmp .loop
 .done:
+    test rdx, rdx
+    jz .positive
+    neg rax
+.positive:
     ret
 .invalid:
     mov rax, 60
@@ -54,6 +70,8 @@ ascii_to_int:
 is_prime:
     cmp rax, 2
     jb .not_prime
+    cmp rax, 2
+    je .prime
     
     mov rbx, rax
     mov rcx, 2
@@ -72,8 +90,8 @@ is_prime:
     jbe .check_loop
     
 .prime:
-    xor rax, rax
+    mov rax, 1
     ret
 .not_prime:
-    mov rax, 1
+    xor rax, rax
     ret

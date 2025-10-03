@@ -4,6 +4,7 @@ section .bss
 section .data
     target db "1337"
     patch db "H4CK"
+    already_patched db "H4CK"
 
 section .text
     global _start
@@ -26,6 +27,15 @@ _start:
     mov rdx, 16384
     syscall
     mov r13, rax
+
+    mov rdi, buffer
+    mov rsi, already_patched
+    mov rcx, r13
+    mov rdx, 4
+    call search_string
+    
+    cmp rax, 0
+    jne .already_patched
 
     mov rdi, buffer
     mov rsi, target
@@ -52,6 +62,12 @@ _start:
     mov rsi, buffer
     mov rdx, r13
     syscall
+
+.already_patched:
+    mov rax, 3
+    mov rdi, r12
+    syscall
+    jmp exit_failure
 
 .close_and_exit:
     mov rax, 3

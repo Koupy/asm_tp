@@ -5,7 +5,7 @@ section .data
     output_len equ $ - output
 
 section .bss
-    buffer resb 8
+    buffer resb 1024
 
 section .text
     global _start
@@ -14,11 +14,14 @@ _start:
     mov rax, 0
     mov rdi, 0
     mov rsi, buffer
-    mov rdx, 8
+    mov rdx, 1024
     syscall
 
+    cmp rax, 0
+    jle exit_failure
+
     cmp rax, expected_len
-    jne exit_failure
+    jl exit_failure
 
     mov rsi, buffer
     mov rdi, expected

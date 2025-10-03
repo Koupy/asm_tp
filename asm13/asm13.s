@@ -1,5 +1,5 @@
 section .bss
-    buffer resb 1024
+    buffer resb 65536
 
 section .text
     global _start
@@ -8,7 +8,7 @@ _start:
     mov rax, 0
     mov rdi, 0
     mov rsi, buffer
-    mov rdx, 1024
+    mov rdx, 65536
     syscall
 
     mov r12, rax

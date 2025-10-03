@@ -16,6 +16,7 @@ _start:
 
     mov rax, 1
     mov rdi, 1
+    mov rsi, [rsp+16]
     syscall
 
     mov rax, 1

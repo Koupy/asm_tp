@@ -13,10 +13,14 @@ _start:
 
     mov rsi, [rsp+16]
     call ascii_to_int
+    cmp rcx, 1
+    je exit_failure
     mov r12, rax
 
     mov rsi, [rsp+24]
     call ascii_to_int
+    cmp rcx, 1
+    je exit_failure
     mov r13, rax
 
     add r12, r13
@@ -50,6 +54,7 @@ exit_failure:
 ascii_to_int:
     xor rax, rax
     xor rbx, rbx
+    xor rcx, rcx
     mov r10, 1
 
     cmp byte [rsi], '-'
@@ -61,11 +66,22 @@ ascii_to_int:
     mov bl, [rsi]
     cmp bl, 0
     je .done
+    
+    cmp bl, '0'
+    jl .error
+    cmp bl, '9'
+    jg .error
+    
     sub bl, '0'
     imul rax, 10
     add rax, rbx
     inc rsi
     jmp .loop
+    
+.error:
+    mov rcx, 1
+    ret
+    
 .done:
     imul rax, r10
     ret

@@ -16,6 +16,8 @@ _start:
 
     cmp rcx, 1
     je exit_bad_input
+    cmp rcx, 2
+    je exit_bad_input
 
     test rax, 1
     jnz exit_odd
@@ -39,6 +41,14 @@ ascii_to_int:
     xor rax, rax
     xor rbx, rbx
     xor rcx, rcx
+    xor rdx, rdx
+    
+    mov bl, [rsi]
+    cmp bl, '-'
+    jne .loop
+    mov rdx, 1
+    inc rsi
+    
 .loop:
     mov bl, [rsi]
     cmp bl, 10
@@ -52,12 +62,28 @@ ascii_to_int:
     jg .error
 
     sub bl, '0'
+    
+    mov r8, rax
     imul rax, 10
+    jo .overflow
     add rax, rbx
+    jo .overflow
+    
+    cmp rax, r8
+    jl .overflow
+    
     inc rsi
     jmp .loop
+
+.overflow:
+    mov rcx, 2
+    jmp .done
 
 .error:
     mov rcx, 1
 .done:
+    test rdx, rdx
+    jz .positive
+    neg rax
+.positive:
     ret
